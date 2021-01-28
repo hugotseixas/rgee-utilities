@@ -1,16 +1,10 @@
 
-library(rgee)
-library(sf)
-library(tidyverse)
+#' @export
+calc_area <- function(image, features) {
 
+  bands <- image$bandNames()$getInfo()
 
-calc_area <- function(image, bands_list) {
-
-  bands <- bands_list
-
-  img <- image
-
-  ## Calculate area for each value, band, and municipality ----
+  # Calculate area for each value, band, and municipality
   area_collection <-
     map_df(
       .x = municip_intersection$code_muni,
@@ -24,7 +18,7 @@ calc_area <- function(image, bands_list) {
             municip_intersection %>% filter(code_muni == muni)
           )
 
-        ## Get area for each band in the state -----
+        # Get area for each band in the state
         return(
           map_df(
             .x = bands,
@@ -32,7 +26,7 @@ calc_area <- function(image, bands_list) {
 
               cat(b, " ", sep = " ")
 
-              ## Calculate area by group (discrete values of each band) ----
+              # Calculate area by group (discrete values of each band)
               areas <-
                 ee$Image$
                 pixelArea()$
@@ -49,7 +43,7 @@ calc_area <- function(image, bands_list) {
                 get("groups")$
                 getInfo()
 
-              ## Return values as a table ----
+              # Return values as a table
               return(
                 tibble(key = map(areas, "value"), area = map(areas, "sum")) %>%
                   unnest(cols = c(key, area)) %>%
